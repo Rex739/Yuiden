@@ -74,6 +74,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
   const [statusMessage, setStatusMessage] = useState("Wallet not connected - using local fallback receipt mode.");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSettling, setIsSettling] = useState(false);
+  const [isAgentRunning, setIsAgentRunning] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [hasLoadedStoredState, setHasLoadedStoredState] = useState(false);
 
@@ -93,10 +94,33 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
     };
   }, [receipts]);
 
-  function handleRunAgent() {
-    const nextDecision = runYuidenAgent(houses);
-    setDecision(nextDecision);
-    setStatusMessage("YuiDen Agent prepared an HSP-aligned settlement flow.");
+  async function handleRunAgent() {
+    setErrorMessage("");
+    setIsAgentRunning(true);
+    setStatusMessage("YuiDen Agent is checking Tokyo weather and preparing deterministic settlement values...");
+
+    try {
+      const response = await fetch("/api/agent", { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error("Agent route unavailable");
+      }
+
+      const payload = (await response.json()) as { decision?: AgentDecision };
+
+      if (!payload.decision) {
+        throw new Error("Agent route returned no decision");
+      }
+
+      setDecision(payload.decision);
+      setStatusMessage("YuiDen Agent prepared a weather-aware HSP-aligned settlement flow.");
+    } catch {
+      const nextDecision = runYuidenAgent(houses);
+      setDecision(nextDecision);
+      setStatusMessage("Weather-aware reasoning unavailable - deterministic HSP-aligned settlement flow prepared.");
+    } finally {
+      setIsAgentRunning(false);
+    }
   }
 
   useEffect(() => {
@@ -113,6 +137,11 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
 
   useEffect(() => {
     if (!hasLoadedStoredState) return;
+
+    if (!decision && receipts.length === 0 && statusMessage === "Local console data cleared.") {
+      clearDashboardState();
+      return;
+    }
 
     saveDashboardState({ decision, receipts, statusMessage });
   }, [decision, hasLoadedStoredState, receipts, statusMessage]);
@@ -361,6 +390,14 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
     setDecision(activeDecision);
     setErrorMessage("");
     createLocalReceipt(activeDecision, "Local fallback receipt created.");
+  }
+
+  function handleClearLocalConsoleData() {
+    setDecision(null);
+    setReceipts([]);
+    setErrorMessage("");
+    setStatusMessage("Local console data cleared.");
+    clearDashboardState();
   }
 
   async function handleSettlement() {
@@ -654,6 +691,13 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
                 <ShellStat label="Allowance" value={needsAllowance ? "Needed" : mockUsdtAllowance} />
                 <ShellStat label="Receipt mode" value={onChainReady ? "On-chain" : "Local"} />
                 <ShellStat label="Receipts" value={`${receipts.length}`} />
+                <button
+                  type="button"
+                  onClick={handleClearLocalConsoleData}
+                  className="min-w-0 rounded-2xl border-2 border-[#123D24] bg-white px-4 py-4 text-left text-xs font-black uppercase text-[#123D24] shadow-[0_0_0_3px_rgba(246,183,60,0.18)] transition hover:border-[#F6B73C] hover:bg-[#FFF3D1] hover:text-[#071A12] sm:px-5"
+                >
+                  Clear local console data
+                </button>
               </div>
             </div>
           </section>
@@ -666,7 +710,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
 
           <section id="agent" className="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.03fr)_minmax(36rem,0.97fr)]">
             <div className="grid gap-6">
-              <DecisionPanel decision={decision} onRunAgent={handleRunAgent} />
+              <DecisionPanel decision={decision} isAgentRunning={isAgentRunning} onRunAgent={handleRunAgent} />
               <SettlementPanel
                 decision={decision}
                 walletAddress={walletAddress}
@@ -806,7 +850,15 @@ function HouseCard({ house }: { house: HouseMeter }) {
   );
 }
 
-function DecisionPanel({ decision, onRunAgent }: { decision: AgentDecision | null; onRunAgent: () => void }) {
+function DecisionPanel({
+  decision,
+  isAgentRunning,
+  onRunAgent,
+}: {
+  decision: AgentDecision | null;
+  isAgentRunning: boolean;
+  onRunAgent: () => void | Promise<void>;
+}) {
   const confidence = decision?.confidence ?? 0;
 
   return (
@@ -819,8 +871,12 @@ function DecisionPanel({ decision, onRunAgent }: { decision: AgentDecision | nul
             AI settlement decision
           </h2>
         </div>
-        <button onClick={onRunAgent} className="w-full rounded-full bg-[#9BE870] px-6 py-4 font-black text-[#071A12] shadow-glow sm:w-fit">
-          Run YuiDen Agent
+        <button
+          onClick={onRunAgent}
+          disabled={isAgentRunning}
+          className="w-full rounded-full bg-[#9BE870] px-6 py-4 font-black text-[#071A12] shadow-glow disabled:cursor-not-allowed disabled:opacity-60 sm:w-fit"
+        >
+          {isAgentRunning ? "Checking Weather..." : "Run YuiDen Agent"}
         </button>
       </div>
       </div>
@@ -839,6 +895,39 @@ function DecisionPanel({ decision, onRunAgent }: { decision: AgentDecision | nul
             <MiniStat label="Dynamic price" value={`¥${decision.pricePerKwhJPY}/kWh`} />
             <MiniStat label="Zone" value={decision.zone} />
           </div>
+          {decision.weather ? (
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <MiniStat label="Tokyo solar" value={`${decision.weather.solarCondition} ${decision.weather.solarMultiplier.toFixed(2)}x`} />
+              <MiniStat label="Cloud cover" value={`${Math.round(decision.weather.cloudCoverPct)}%`} />
+              <MiniStat label="Demand bias" value={decision.weather.demandBias} />
+            </div>
+          ) : null}
+          {decision.score ? (
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <MiniStat label="Locality score" value={`${decision.score.localityScore}%`} />
+              <MiniStat label="Balance score" value={`${decision.score.balanceScore}%`} />
+              <MiniStat label="Settlement ready" value={`${decision.score.settlementReadinessScore}%`} />
+            </div>
+          ) : null}
+          {decision.reasoning ? (
+            <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/10 p-5">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-[#9BE870] px-3 py-1 text-xs font-black uppercase text-[#071A12]">
+                  {decision.reasoning.source === "openai" ? "OpenAI reasoning" : "Deterministic reasoning"}
+                </span>
+                {decision.weather ? (
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase text-white/70">
+                    Weather: {decision.weather.source}
+                  </span>
+                ) : null}
+              </div>
+              <p className="text-sm font-bold leading-6 text-white/75">{decision.reasoning.summary}</p>
+              {decision.localExplanation ? (
+                <p className="mt-3 text-sm font-bold leading-6 text-white/65">{decision.localExplanation.riskNote}</p>
+              ) : null}
+              <p className="mt-3 text-xs font-bold leading-5 text-white/50">{decision.reasoning.settlementRationale}</p>
+            </div>
+          ) : null}
           <div className="mt-5">
             <div className="mb-2 flex items-center justify-between text-sm font-bold text-white/70">
               <span>Confidence meter</span>
@@ -948,38 +1037,32 @@ function ReceiptTable({ receipts, liveCount }: { receipts: EnergyReceipt[]; live
               <ReceiptMetric label="CO2" value={`${receipt.co2SavedKg} kg`} />
             </div>
             {receipt.status === "onchain" && receipt.txHash ? (
-              <a
-                href={getTxExplorerUrl(receipt.txHash)}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex max-w-full rounded-full bg-[#E8FFF6] px-4 py-2 text-xs font-black text-[#20C997]"
-              >
-                <span className="truncate">
-                  {receipt.txHash.slice(0, 10)}...{receipt.txHash.slice(-6)}
-                </span>
-              </a>
+              <div className="mt-4">
+                <TxHashPill txHash={receipt.txHash} />
+              </div>
             ) : null}
           </article>
         ))}
       </div>
 
       <div className="hidden w-full max-w-full overflow-x-auto rounded-[2rem] border border-[#E5E7EB] bg-[#FFFDF7] p-3 md:block">
-        <table className="w-full min-w-[760px] border-separate border-spacing-y-3 text-left text-sm xl:min-w-[860px]">
+        <table className="w-full min-w-[900px] border-separate border-spacing-y-3 text-left text-sm xl:min-w-[980px]">
           <thead className="text-[#53645B]">
             <tr>
               <th className="w-[8rem] px-4 py-2">ID</th>
-              <th className="min-w-[18rem] px-4 py-2">Route</th>
+              <th className="min-w-[16rem] px-4 py-2">Route</th>
               <th className="w-[5rem] px-4 py-2">kWh</th>
               <th className="w-[5rem] px-4 py-2">JPY</th>
               <th className="w-[6rem] px-4 py-2">CO2</th>
-              <th className="w-[11rem] px-4 py-2">Status</th>
+              <th className="w-[10rem] px-4 py-2">Status</th>
+              <th className="w-[12rem] px-4 py-2">Tx hash</th>
             </tr>
           </thead>
           <tbody>
             {receipts.map((receipt) => (
               <tr key={receipt.id} className="bg-white shadow-sm">
                 <td className="rounded-l-2xl px-5 py-5 [font-family:var(--font-rowdies)] text-lg font-black">{receipt.id}</td>
-                <td className="min-w-[18rem] px-4 py-4">
+                <td className="min-w-[16rem] px-4 py-4">
                   <span className="block break-words font-black leading-6">
                     {receipt.producerName} &rarr; {receipt.buyerName}
                   </span>
@@ -990,22 +1073,19 @@ function ReceiptTable({ receipts, liveCount }: { receipts: EnergyReceipt[]; live
                 <td className="px-4 py-4 font-bold">{receipt.matchedKwh}</td>
                 <td className="px-4 py-4 font-bold">¥{receipt.totalJPY}</td>
                 <td className="px-4 py-4 font-bold">{receipt.co2SavedKg} kg</td>
+                <td className="px-4 py-4">
+                  <StatusPill tone={receipt.status === "onchain" ? "green" : "white"}>
+                    {receipt.status === "onchain" ? "On-chain" : "Local fallback"}
+                  </StatusPill>
+                </td>
                 <td className="rounded-r-2xl px-4 py-4">
-                  <div className="flex flex-col gap-2">
-                    <StatusPill tone={receipt.status === "onchain" ? "green" : "white"}>
-                      {receipt.status === "onchain" ? "On-chain" : "Local fallback"}
-                    </StatusPill>
-                    {receipt.status === "onchain" && receipt.txHash ? (
-                      <a
-                        href={getTxExplorerUrl(receipt.txHash)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex max-w-[10rem] rounded-full bg-[#E8FFF6] px-3 py-1.5 text-xs font-black text-[#20C997]"
-                      >
-                        <span className="truncate">{receipt.txHash.slice(0, 10)}...{receipt.txHash.slice(-6)}</span>
-                      </a>
-                    ) : null}
-                  </div>
+                  {receipt.status === "onchain" && receipt.txHash ? (
+                    <TxHashPill txHash={receipt.txHash} />
+                  ) : (
+                    <span className="inline-flex rounded-full bg-[#FFF3D1] px-3 py-1.5 text-xs font-black text-[#53645B]">
+                      Local only
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -1013,6 +1093,22 @@ function ReceiptTable({ receipts, liveCount }: { receipts: EnergyReceipt[]; live
         </table>
       </div>
     </section>
+  );
+}
+
+function TxHashPill({ txHash }: { txHash: string }) {
+  return (
+    <a
+      href={getTxExplorerUrl(txHash)}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex max-w-full rounded-full bg-[#E8FFF6] px-3 py-1.5 text-xs font-black text-[#20C997] transition hover:bg-[#9BE870] hover:text-[#071A12]"
+      title="Open HashKey Chain testnet explorer"
+    >
+      <span className="truncate">
+        {txHash.slice(0, 6)}...{txHash.slice(-6)}
+      </span>
+    </a>
   );
 }
 
@@ -1173,6 +1269,16 @@ function saveDashboardState(state: PersistedDashboardState) {
     window.localStorage.setItem(DASHBOARD_STORAGE_KEY, JSON.stringify(state));
   } catch {
     // Persistence is helpful for the demo, but local fallback should keep working without it.
+  }
+}
+
+function clearDashboardState() {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.removeItem(DASHBOARD_STORAGE_KEY);
+  } catch {
+    // Clearing local demo state should never interrupt wallet or settlement readiness.
   }
 }
 

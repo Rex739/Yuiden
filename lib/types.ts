@@ -1,4 +1,6 @@
 import type { HSPEnergyOrder, HSPReceiptPayload } from "@/lib/hsp";
+import type { YuiDenAgentForecast, YuiDenAgentScore, YuiDenAgentOutput } from "@/lib/yuidenAgent";
+import type { WeatherSnapshot } from "@/lib/weather";
 
 export type HouseMeter = {
   id: string;
@@ -24,6 +26,18 @@ export type AgentDecision = {
   co2SavedKg: number;
   reason: string;
   confidence: number;
+  weather?: WeatherSnapshot;
+  forecast?: YuiDenAgentForecast;
+  score?: YuiDenAgentScore;
+  localExplanation?: YuiDenAgentOutput["localExplanation"];
+  reasoning?: AgentReasoning;
+};
+
+export type AgentReasoning = {
+  source: "openai" | "deterministic";
+  summary: string;
+  weatherImpact: string;
+  settlementRationale: string;
 };
 
 export type EnergyReceipt = {
