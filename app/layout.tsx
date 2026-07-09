@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   title: "YuiDen | AI Settlement for Solar Communities",
   description:
     "HSP-aligned AI settlement layer for Japan's post-FIT solar communities on HashKey Chain.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+    ],
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
