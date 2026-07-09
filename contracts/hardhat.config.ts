@@ -22,6 +22,11 @@ const config: HardhatUserConfig = {
       chainId: 133,
       accounts: privateKey ? [privateKey] : [],
     },
+    hashkeyMainnet: {
+      url: process.env.HASHKEY_MAINNET_RPC_URL || "https://mainnet.hsk.xyz",
+      chainId: 177,
+      accounts: privateKey ? [privateKey] : [],
+    },
   },
 };
 

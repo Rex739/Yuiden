@@ -6,10 +6,13 @@ import { PrivyProvider, usePrivy, useWallets } from "@privy-io/react-auth";
 import { BrowserProvider, Contract, formatUnits, getAddress, isAddress, parseUnits, ZeroAddress } from "ethers";
 import { mockUsdtAbi, yuidenSettlementAbi } from "@/lib/contractAbi";
 import {
+  ACTIVE_HASHKEY_CHAIN,
+  ACTIVE_PRIVY_HASHKEY_CHAIN,
   HASHKEY_CHAIN_ID,
   HASHKEY_CHAIN_ID_HEX,
   HASHKEY_RPC_URL,
   MOCK_USDT_ADDRESS,
+  PRIVY_HASHKEY_CHAINS,
   YUIDEN_SETTLEMENT_ADDRESS,
   getTxExplorerUrl,
   hasContractConfig,
@@ -55,7 +58,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <PrivyProvider appId={PRIVY_APP_ID}>
+    <PrivyProvider
+      appId={PRIVY_APP_ID}
+      config={{
+        supportedChains: PRIVY_HASHKEY_CHAINS,
+        defaultChain: ACTIVE_PRIVY_HASHKEY_CHAIN,
+      }}
+    >
       <DashboardConsole privyEnabled />
     </PrivyProvider>
   );
@@ -274,14 +283,10 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
         params: [
           {
             chainId: HASHKEY_CHAIN_ID_HEX,
-            chainName: "HashKey Chain Testnet",
-            nativeCurrency: {
-              name: "HSK",
-              symbol: "HSK",
-              decimals: 18,
-            },
+            chainName: ACTIVE_HASHKEY_CHAIN.chainName,
+            nativeCurrency: ACTIVE_HASHKEY_CHAIN.nativeCurrency,
             rpcUrls: [HASHKEY_RPC_URL],
-            blockExplorerUrls: ["https://hashkeychain-testnet-explorer.alt.technology"],
+            blockExplorerUrls: ACTIVE_HASHKEY_CHAIN.blockExplorerUrls,
           },
         ],
       });
@@ -297,13 +302,13 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
     }
 
     try {
-      setStatusMessage("Requesting HashKey Chain Testnet in wallet...");
+      setStatusMessage(`Requesting ${ACTIVE_HASHKEY_CHAIN.chainName} in wallet...`);
       await ensureHashKeyNetwork(activeProvider);
       await refreshWalletState(walletAddress, activeProvider);
-      setStatusMessage("HashKey Chain Testnet is active.");
+      setStatusMessage(`${ACTIVE_HASHKEY_CHAIN.chainName} is active.`);
     } catch (error) {
       setErrorMessage(getFriendlyError(error));
-      setStatusMessage("Wrong network - switch to HashKey Chain Testnet for on-chain settlement.");
+      setStatusMessage(`Wrong network - switch to ${ACTIVE_HASHKEY_CHAIN.chainName} for on-chain settlement.`);
     }
   }
 
@@ -431,8 +436,8 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
       setChainId(activeChainId);
 
       if (activeChainId !== HASHKEY_CHAIN_ID) {
-        setStatusMessage("Wrong network - switch to HashKey Chain Testnet for on-chain settlement.");
-        setErrorMessage("Local fallback remains available until the wallet is on HashKey Chain Testnet.");
+        setStatusMessage(`Wrong network - switch to ${ACTIVE_HASHKEY_CHAIN.chainName} for on-chain settlement.`);
+        setErrorMessage(`Local fallback remains available until the wallet is on ${ACTIVE_HASHKEY_CHAIN.chainName}.`);
         return;
       }
 
@@ -498,7 +503,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
       const hspReceipt = createHSPReceiptPayload({ order: hspOrder, txHash, status: "receipt_recorded" });
 
       addReceipt(activeDecision, "onchain", txHash, hspOrder, hspReceipt);
-      setStatusMessage("On-chain receipt created on HashKey Chain testnet.");
+      setStatusMessage(`On-chain receipt created on ${ACTIVE_HASHKEY_CHAIN.chainName}.`);
       await refreshWalletState(buyerAddress, activeProvider);
     } catch (error) {
       const friendlyError = getFriendlyError(error);
@@ -628,7 +633,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
               <div className="min-w-0">
                 <div className="mb-4 flex flex-wrap gap-2 sm:mb-5">
                   <StatusPill tone={isCorrectNetwork ? "green" : "amber"}>
-                    {chainId ? (isCorrectNetwork ? "HashKey Chain Testnet" : "Wrong network") : "Network not connected"}
+                    {chainId ? (isCorrectNetwork ? ACTIVE_HASHKEY_CHAIN.chainName : "Wrong network") : "Network not connected"}
                   </StatusPill>
                   <StatusPill tone={hasContractConfig ? "green" : "amber"}>
                     {hasContractConfig ? "Contracts configured" : "Local fallback active"}
@@ -984,7 +989,7 @@ function SettlementPanel({
         <Meter label="CO2 saved" value={decision ? `${decision.co2SavedKg} kg` : "Pending"} />
         <Meter label="MockUSDT balance" value={mockUsdtBalance} />
         <Meter label="Approval state" value={needsAllowance ? "Allowance needed" : "Ready"} />
-        <Meter label="Settlement mode" value={walletAddress && hasContractConfig && isCorrectNetwork ? "HashKey testnet" : "Local fallback"} />
+        <Meter label="Settlement mode" value={walletAddress && hasContractConfig && isCorrectNetwork ? ACTIVE_HASHKEY_CHAIN.chainName : "Local fallback"} />
         <Meter label="Expected receipt" value={walletAddress && hasContractConfig && isCorrectNetwork ? "On-chain" : "Local fallback"} />
       </div>
       <button
@@ -1103,7 +1108,7 @@ function TxHashPill({ txHash }: { txHash: string }) {
       target="_blank"
       rel="noreferrer"
       className="inline-flex max-w-full rounded-full bg-[#E8FFF6] px-3 py-1.5 text-xs font-black text-[#20C997] transition hover:bg-[#9BE870] hover:text-[#071A12]"
-      title="Open HashKey Chain testnet explorer"
+      title="Open HashKey Chain explorer"
     >
       <span className="truncate">
         {txHash.slice(0, 6)}...{txHash.slice(-6)}
@@ -1324,7 +1329,7 @@ function getFriendlyError(error: unknown) {
     }
 
     if (message.toLowerCase().includes("insufficient funds")) {
-      return "Wallet has insufficient gas funds for HashKey Chain testnet.";
+      return "Wallet has insufficient gas funds for the configured HashKey network.";
     }
 
     if (message.toLowerCase().includes("missing revert data")) {
@@ -1340,7 +1345,7 @@ function getFriendlyError(error: unknown) {
     }
 
     if (error.message.includes("insufficient funds")) {
-      return "Wallet has insufficient gas funds for HashKey Chain testnet.";
+      return "Wallet has insufficient gas funds for the configured HashKey network.";
     }
 
     return error.message.length > 160 ? `${error.message.slice(0, 157)}...` : error.message;
