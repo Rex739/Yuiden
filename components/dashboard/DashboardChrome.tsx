@@ -252,3 +252,53 @@ export function SettlementStatusPanel({
     </section>
   );
 }
+
+export function DisconnectWalletModal({
+  walletAddress,
+  onCancel,
+  onConfirm,
+}: {
+  walletAddress: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[60] grid place-items-center px-4" role="dialog" aria-modal="true" aria-labelledby="disconnect-wallet-title">
+      <button
+        type="button"
+        className="absolute inset-0 bg-[#071A12]/45 backdrop-blur-sm"
+        onClick={onCancel}
+        aria-label="Cancel wallet disconnect"
+      />
+      <div className="relative w-full max-w-md rounded-[2rem] border border-[#E5E7EB] bg-white p-6 text-[#071A12] shadow-soft">
+        <p className="text-sm font-black uppercase text-[#20C997]">Wallet session</p>
+        <h2 id="disconnect-wallet-title" className="mt-2 [font-family:var(--font-rowdies)] text-3xl font-black uppercase leading-none">
+          Disconnect wallet?
+        </h2>
+        <p className="mt-4 text-sm font-bold leading-6 text-[#53645B]">
+          This will disconnect the dashboard session for{" "}
+          <span className="font-black text-[#071A12]">
+            {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+          </span>
+          . Local receipts and console data will stay intact.
+        </p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-full border border-[#123D24]/15 bg-[#FFFDF7] px-5 py-3 text-sm font-black text-[#123D24] transition hover:bg-[#FFF3D1]"
+          >
+            Keep connected
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="rounded-full bg-[#123D24] px-5 py-3 text-sm font-black text-[#9BE870] shadow-sm transition hover:bg-[#0D3500] hover:text-white"
+          >
+            Disconnect wallet
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -6,19 +6,22 @@ import type { EthereumProvider } from "@/components/dashboard/types";
 
 export function PrivyWalletBridge({
   onConnectReady,
+  onDisconnectReady,
   onDisconnected,
   onWalletReady,
 }: {
   onConnectReady: (connect: (() => void) | null) => void;
+  onDisconnectReady: (disconnect: (() => Promise<void>) | null) => void;
   onDisconnected: () => void;
   onWalletReady: (address: string, provider: EthereumProvider) => void | Promise<void>;
 }) {
-  const { ready, authenticated, connectWallet, login } = usePrivy();
+  const { ready, authenticated, connectWallet, login, logout } = usePrivy();
   const { ready: walletsReady, wallets } = useWallets();
 
   useEffect(() => {
     if (!ready) {
       onConnectReady(null);
+      onDisconnectReady(null);
       return;
     }
 
@@ -30,7 +33,8 @@ export function PrivyWalletBridge({
 
       connectWallet();
     });
-  }, [authenticated, connectWallet, login, onConnectReady, ready]);
+    onDisconnectReady(logout);
+  }, [authenticated, connectWallet, login, logout, onConnectReady, onDisconnectReady, ready]);
 
   useEffect(() => {
     let cancelled = false;

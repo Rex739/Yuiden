@@ -23,7 +23,14 @@ import {
 } from "@/lib/hsp";
 import type { AgentDecision, EnergyReceipt } from "@/lib/types";
 import { getDemand, getSurplus, houses, runYuidenAgent } from "@/lib/yuiden";
-import { DashboardHeader, DashboardSidebar, MobileNav, MobileTopBar, SettlementStatusPanel } from "@/components/dashboard/DashboardChrome";
+import {
+  DashboardHeader,
+  DashboardSidebar,
+  DisconnectWalletModal,
+  MobileNav,
+  MobileTopBar,
+  SettlementStatusPanel,
+} from "@/components/dashboard/DashboardChrome";
 import { HouseCard, MetricCard } from "@/components/dashboard/DashboardCards";
 import { DecisionPanel, SettlementPanel } from "@/components/dashboard/DashboardPanels";
 import { PrivyWalletBridge } from "@/components/dashboard/PrivyWalletBridge";
@@ -76,6 +83,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
   const [walletAddress, setWalletAddress] = useState("");
   const [privyProvider, setPrivyProvider] = useState<EthereumProvider | null>(null);
   const [privyConnect, setPrivyConnect] = useState<(() => void) | null>(null);
+  const [privyDisconnect, setPrivyDisconnect] = useState<(() => Promise<void>) | null>(null);
   const [chainId, setChainId] = useState<number | null>(null);
   const [mockUsdtBalance, setMockUsdtBalance] = useState("Not checked");
   const [mockUsdtAllowance, setMockUsdtAllowance] = useState("Not checked");
@@ -85,6 +93,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
   const [isSettling, setIsSettling] = useState(false);
   const [isAgentRunning, setIsAgentRunning] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false);
   const [hasLoadedStoredState, setHasLoadedStoredState] = useState(false);
 
   const isCorrectNetwork = chainId === HASHKEY_CHAIN_ID;
@@ -233,6 +242,40 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
   const handlePrivyConnectReady = useCallback((connect: (() => void) | null) => {
     setPrivyConnect(connect ? () => connect : null);
   }, []);
+
+  const handlePrivyDisconnectReady = useCallback((disconnect: (() => Promise<void>) | null) => {
+    setPrivyDisconnect(disconnect ? () => disconnect : null);
+  }, []);
+
+  async function handleDisconnectWallet() {
+    setErrorMessage("");
+
+    try {
+      if (privyEnabled && privyDisconnect) {
+        await privyDisconnect();
+      }
+    } catch (error) {
+      setErrorMessage(getFriendlyError(error));
+    } finally {
+      setPrivyProvider(null);
+      setWalletAddress("");
+      setChainId(null);
+      setMockUsdtBalance("Not checked");
+      setMockUsdtAllowance("Not checked");
+      setNeedsAllowance(false);
+      setIsDisconnectModalOpen(false);
+      setStatusMessage("Wallet disconnected - using local fallback receipt mode.");
+    }
+  }
+
+  async function handleWalletButtonClick() {
+    if (walletAddress) {
+      setIsDisconnectModalOpen(true);
+      return;
+    }
+
+    await handleConnectWallet();
+  }
 
   async function handleConnectWallet() {
     setErrorMessage("");
@@ -528,6 +571,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
       {privyEnabled ? (
         <PrivyWalletBridge
           onConnectReady={handlePrivyConnectReady}
+          onDisconnectReady={handlePrivyDisconnectReady}
           onDisconnected={handlePrivyWalletDisconnected}
           onWalletReady={handlePrivyWalletReady}
         />
@@ -536,10 +580,17 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
       <MobileTopBar
         walletAddress={walletAddress}
         isMobileNavOpen={isMobileNavOpen}
-        onConnectWallet={handleConnectWallet}
+        onConnectWallet={handleWalletButtonClick}
         onOpenNav={() => setIsMobileNavOpen(true)}
       />
       <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
+      {isDisconnectModalOpen && walletAddress ? (
+        <DisconnectWalletModal
+          walletAddress={walletAddress}
+          onCancel={() => setIsDisconnectModalOpen(false)}
+          onConfirm={handleDisconnectWallet}
+        />
+      ) : null}
 
       <div className="mx-auto flex max-w-[1600px] gap-4 px-3 py-4 sm:px-4 md:px-6 lg:gap-5 2xl:gap-6 2xl:px-8">
         <DashboardSidebar />
@@ -551,7 +602,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
             isCorrectNetwork={isCorrectNetwork}
             onChainReady={onChainReady}
             needsAllowance={needsAllowance}
-            onConnectWallet={handleConnectWallet}
+            onConnectWallet={handleWalletButtonClick}
             onSwitchNetwork={handleSwitchNetwork}
           />
 
