@@ -17,7 +17,7 @@ export default function PremiumDashboardPreview() {
             <p className="text-xs font-black uppercase text-sky">YuiDen Console</p>
             <h3 className="mt-2 text-2xl font-black">Tokyo-East settlement run</h3>
           </div>
-          <span className="w-fit rounded-full bg-energy px-4 py-2 text-sm font-black text-deep">HashKey Testnet</span>
+          <span className="w-fit rounded-full bg-energy px-4 py-2 text-sm font-black text-deep">Mainnet Proof</span>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {metrics.map(([label, value, tone]) => (

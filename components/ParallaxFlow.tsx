@@ -6,30 +6,30 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const stories = [
   {
-    tag: "Smart meters",
+    tag: "Simulated meters",
     title: "Read the local energy moment.",
-    copy: "Solar output, battery reserve, and household demand are turned into a clean settlement signal.",
+    copy: "Modeled solar output, battery reserve, household demand, and Tokyo weather become a clean settlement signal.",
     meta: "24.7 kWh surplus",
     tone: "bg-[#9BE870]",
   },
   {
     tag: "YuiDen Agent",
     title: "Match homes like a settlement desk.",
-    copy: "The agent prioritizes same-zone routes, highest surplus, and highest nearby demand.",
+    copy: "The custom agent prioritizes same-zone routes, highest surplus, nearby demand, and settlement readiness.",
     meta: "94% confidence",
     tone: "bg-[#123D24] text-[#9BE870]",
   },
   {
-    tag: "HSP rail",
-    title: "Price and settle in one flow.",
-    copy: "Dynamic kWh pricing is prepared for frequent machine-speed micro-settlements.",
+    tag: "HSP-ready flow",
+    title: "Prepare the order lifecycle.",
+    copy: "Dynamic kWh pricing is shaped into an HSP-aligned order and receipt path for future merchant integration.",
     meta: "¥27.5/kWh",
     tone: "bg-[#F6B73C] text-[#071A12]",
   },
   {
     tag: "HashKey Chain",
     title: "Leave a receipt every time.",
-    copy: "Each receipt captures producer, buyer, kWh, amount, zone, CO2 impact, and transaction status.",
+    copy: "Each receipt records producer, buyer, kWh, value, zone, carbon estimate, and transaction status.",
     meta: "Audit ready",
     tone: "bg-white text-[#071A12]",
   },
@@ -100,8 +100,8 @@ export default function ParallaxFlow() {
             For solar communities settling locally.
           </h2>
           <p className="story-copy mt-6 max-w-lg text-lg font-bold leading-8 text-[#53645B]">
-            A carousel-style journey from smart-meter signal to auditable HashKey Chain receipt, designed for local
-            renewable settlement.
+            A carousel-style journey from simulated meter context to auditable HashKey Chain receipt, designed for
+            local renewable settlement.
           </p>
           <div className="story-controls mt-8 flex gap-4">
             <button

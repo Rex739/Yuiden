@@ -530,7 +530,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
         />
       ) : null}
 
-      <div className="sticky top-0 z-40 border-b border-[#E5E7EB] bg-[#FFFDF7]/92 px-3 py-3 backdrop-blur-xl 2xl:hidden">
+      <div className="sticky top-0 z-40 border-b border-[#E5E7EB] bg-[#FFFDF7]/92 px-3 py-3 backdrop-blur-xl lg:hidden">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <button
@@ -556,7 +556,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
       </div>
 
       {isMobileNavOpen ? (
-        <div className="fixed inset-0 z-50 2xl:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <button
             type="button"
             className="absolute inset-0 bg-[#071A12]/35"
@@ -602,8 +602,8 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
         </div>
       ) : null}
 
-      <div className="mx-auto flex max-w-[1600px] gap-6 px-3 py-4 sm:px-4 md:px-6 2xl:px-8">
-        <aside className="sticky top-5 hidden h-[calc(100vh-2.5rem)] w-72 shrink-0 rounded-[2.25rem] border border-[#E5E7EB] bg-white/90 p-5 shadow-soft backdrop-blur-xl 2xl:block">
+      <div className="mx-auto flex max-w-[1600px] gap-4 px-3 py-4 sm:px-4 md:px-6 lg:gap-5 2xl:gap-6 2xl:px-8">
+        <aside className="sticky top-5 hidden h-[calc(100vh-2.5rem)] w-64 shrink-0 rounded-[2.25rem] border border-[#E5E7EB] bg-white/90 p-5 shadow-soft backdrop-blur-xl lg:block xl:w-72">
           <Link href="/" className="[font-family:var(--font-rowdies)] text-3xl font-black tracking-tight">
             Yui<span className="text-[#20C997]">Den</span>
           </Link>
@@ -656,7 +656,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
                   receipts with local fallback reliability.
                 </p>
               </div>
-              <div className="flex min-w-0 flex-wrap gap-3">
+              <div className="flex min-w-0 flex-wrap gap-3 xl:justify-end">
                 {walletAddress && !isCorrectNetwork ? (
                   <button
                     onClick={handleSwitchNetwork}
@@ -667,7 +667,7 @@ function DashboardConsole({ privyEnabled }: { privyEnabled: boolean }) {
                 ) : null}
                 <button
                   onClick={handleConnectWallet}
-                  className="hidden max-w-full truncate rounded-full bg-[#123D24] px-5 py-3 text-sm font-black text-[#9BE870] shadow-sm transition hover:bg-[#0D3500] hover:text-white md:px-6 md:py-4 2xl:inline-flex"
+                  className="hidden max-w-full truncate rounded-full bg-[#123D24] px-5 py-3 text-sm font-black text-[#9BE870] shadow-sm transition hover:bg-[#0D3500] hover:text-white md:inline-flex md:px-6 md:py-4"
                 >
                   {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : "Connect Wallet"}
                 </button>

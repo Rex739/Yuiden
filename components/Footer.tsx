@@ -10,7 +10,7 @@ const productLinks = [
 const buildLinks = [
   ["Dashboard", "/dashboard"],
   ["Contracts", "#receipts"],
-  ["HashKey Testnet", "#receipts"],
+  ["HashKey Chain", "#receipts"],
 ];
 
 export default function Footer() {
@@ -22,7 +22,7 @@ export default function Footer() {
             Yui<span className="text-solar">Den</span>
           </Link>
           <p className="mt-4 max-w-sm leading-7 text-muted">
-            AI-native settlement infrastructure for local renewable energy markets, designed for Japan&apos;s post-FIT
+            AI-assisted settlement infrastructure for local renewable energy markets, designed for Japan&apos;s post-FIT
             solar communities.
           </p>
         </div>

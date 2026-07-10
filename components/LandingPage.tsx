@@ -21,15 +21,15 @@ const steps = [
   ["01", "Simulate meter data", "Model generation, demand, battery level, and zone."],
   ["02", "Find surplus", "Classify each home as producer, buyer, or balanced."],
   ["03", "Match locally", "Prioritize same-zone energy routes with the best available balance."],
-  ["04", "Prepare HSP-ready order", "Prepare micro-settlement terms for smart agents and meters."],
+  ["04", "Prepare HSP-ready order", "Prepare settlement terms for an HSP-aligned order lifecycle."],
   ["05", "Write receipt", "Capture kWh, JPY, USDT, CO2, zone, and chain status."],
 ];
 
 const technicalRails = [
   ["HashKey Chain", "Transparent settlement records for every energy receipt."],
-  ["HSP", "Frequent micro-settlement rail for agent-native payments."],
-  ["AI agent", "Matching, pricing, and route recommendation layer."],
-  ["Receipt", "Audit artifact linking energy, money, carbon, and chain status."],
+  ["HSP", "HSP-ready order flow for frequent agent-native settlement."],
+  ["AI agent", "Weather-aware matching, pricing, and route recommendation layer."],
+  ["Receipt", "Audit artifact linking energy, value, carbon estimate, and chain status."],
 ];
 
 export default function LandingPage() {
@@ -108,14 +108,14 @@ export default function LandingPage() {
           <div>
             <div className="hero-kicker mb-8 flex flex-wrap gap-4 text-sm font-black text-deep/80">
               <span className="rounded-full bg-white px-4 py-2 shadow-sm">AI energy settlement network</span>
-              <span className="rounded-full bg-white px-4 py-2 shadow-sm">Japan post-FIT solar rails</span>
+              <span className="rounded-full bg-white px-4 py-2 shadow-sm">Post-FIT solar settlement</span>
             </div>
             <h1 className="hero-title [font-family:var(--font-rowdies)] max-w-5xl text-6xl font-black uppercase leading-[0.86] text-[#050505] md:text-8xl xl:text-[7.5rem]">
               Settle local solar for less friction
             </h1>
             <p className="hero-copy mt-8 max-w-2xl text-xl font-bold leading-8 text-muted">
-              YuiDen simulates local smart-meter data, matches surplus solar with nearby demand, and creates HSP-aligned
-              settlement receipts on HashKey Chain.
+              YuiDen uses simulated smart-meter data, real Tokyo weather signals, and a custom AI agent to match surplus
+              solar with nearby demand, then records HSP-aligned settlement receipts on HashKey Chain.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {badges.map((badge) => (
@@ -165,8 +165,8 @@ export default function LandingPage() {
             From meter signal to settlement receipt.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg font-bold leading-8 text-muted">
-            YuiDen turns neighborhood energy data into a clear five-step settlement loop for AI agents, households,
-            and receipt auditors.
+            YuiDen turns simulated neighborhood energy data into a clear five-step settlement loop for AI agents,
+            households, and receipt auditors.
           </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
@@ -201,7 +201,7 @@ export default function LandingPage() {
         <div className="rounded-[2.5rem] bg-white p-8 shadow-soft md:p-12">
           <p className="mb-5 text-sm font-black uppercase text-energy">HashKey and HSP alignment</p>
           <h2 className="max-w-4xl [font-family:var(--font-rowdies)] text-5xl font-black uppercase leading-[0.9] md:text-7xl">
-            Meet settlement without borders.
+            Local energy, clear settlement.
           </h2>
           <div className="mt-10 grid gap-5 md:grid-cols-4">
             {technicalRails.map(([title, copy]) => (
@@ -219,7 +219,7 @@ export default function LandingPage() {
           <div className="absolute left-1/2 top-0 h-52 w-52 -translate-x-1/2 rounded-full bg-solar/30 blur-3xl" />
           <div className="relative">
             <h2 className="mx-auto max-w-4xl [font-family:var(--font-rowdies)] text-5xl font-black uppercase leading-[0.9] md:text-7xl">
-              Turn surplus sunlight into instant settlement.
+              TURN SURPLUS SUNLIGHT INTO INSTANT SETTLEMENT.
             </h2>
             <Link href="/dashboard" className="mt-9 inline-flex rounded-full bg-[#9BE870] px-8 py-4 font-black text-deep">
               Run YuiDen Agent
