@@ -96,7 +96,7 @@ export default function ParallaxFlow() {
           <p className="story-kicker mb-5 inline-flex rounded-full bg-[#E8FFF6] px-4 py-2 text-sm font-black text-[#20C997]">
             Product story
           </p>
-          <h2 className="story-title [font-family:var(--font-rowdies)] text-5xl font-black leading-[0.9] text-[#071A12] sm:text-6xl md:text-7xl xl:text-[5.9rem]">
+          <h2 className="story-title [font-family:var(--font-rowdies)] text-5xl font-black leading-[0.9] text-[#071A12] sm:text-6xl md:text-7xl">
             For solar communities settling locally.
           </h2>
           <p className="story-copy mt-6 max-w-lg text-lg font-bold leading-8 text-[#53645B]">
