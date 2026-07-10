@@ -1,183 +1,176 @@
 # YuiDen
 
-YuiDen is an HSP-aligned AI settlement layer for Japan's post-FIT solar communities.
+AI settlement infrastructure for Japan's post-FIT solar communities.
 
-It simulates smart-meter data from local Japanese solar homes, matches surplus solar producers with nearby demand, calculates dynamic kWh pricing, and creates HSP-aligned settlement orders with HashKey Chain receipts.
+YuiDen is an AI energy settlement agent for local renewable energy markets. It uses simulated smart-meter data, real Tokyo weather signals from Open-Meteo, and a custom YuiDen Agent pipeline to match surplus solar with nearby demand. The system prepares an HSP-aligned order and receipt lifecycle, then records settlement receipts on HashKey Chain. Optional server-side OpenAI reasoning explains the agent's recommendation, while deterministic matching and settlement execution remain the source of truth.
 
-## Run Frontend Locally
+YuiDen is a hackathon MVP and mainnet proof, not production financial infrastructure.
 
-```bash
-npm install
-npm run dev
-```
+## Problem
 
-Open `http://localhost:3000` for the landing page and `http://localhost:3000/dashboard` for the settlement console.
+Japan's early feed-in tariff solar contracts are expiring, leaving many rooftop solar owners with weaker incentives for exported power. Post-FIT communities need better ways to coordinate local surplus, price small energy trades, and produce clear audit records for every settlement event.
 
-Create `.env.local` from `.env.example` after contracts are deployed. Use deployed contract addresses for the first two values:
+Local renewable settlement needs three things at once:
 
-```env
-NEXT_PUBLIC_MOCK_USDT_ADDRESS=0x0000000000000000000000000000000000000000
-NEXT_PUBLIC_YUIDEN_SETTLEMENT_ADDRESS=0x0000000000000000000000000000000000000000
-NEXT_PUBLIC_HASHKEY_CHAIN_ID=133
-NEXT_PUBLIC_HASHKEY_RPC_URL=https://testnet.hsk.xyz
-NEXT_PUBLIC_HASHKEY_EXPLORER_URL=https://hashkeychain-testnet-explorer.alt.technology
-NEXT_PUBLIC_PRIVY_APP_ID=
-```
+- A trusted view of surplus and demand.
+- Agent-readable settlement logic.
+- Transparent receipts that communities, operators, and auditors can inspect.
 
-Restart `npm run dev` after changing frontend environment variables.
+YuiDen focuses on that settlement and audit layer. It does not claim physical energy delivery, utility-grid control, or real smart-meter hardware integration.
 
-## Connect MetaMask To HashKey Chain Testnet
+## Solution
 
-The dashboard can request the network switch automatically. If you add it manually in MetaMask, use:
+YuiDen turns a local solar settlement moment into a structured order and receipt flow:
 
-- Network name: `HashKey Chain Testnet`
-- Chain ID: `133`
-- Currency symbol: `HSK`
-- RPC URL: `https://testnet.hsk.xyz`
-- Block explorer: `https://hashkeychain-testnet-explorer.alt.technology`
+1. Simulated smart-meter data models household solar output, demand, battery level, and zone.
+2. Open-Meteo provides a real Tokyo weather signal for solar and demand context.
+3. The custom YuiDen Agent forecasts surplus and demand, scores locality, evaluates settlement readiness, and recommends a route.
+4. Optional server-side OpenAI reasoning explains the recommendation in human-readable language.
+5. An HSP-aligned order and receipt lifecycle prepares the flow for official HSP merchant/order integration.
+6. HashKey Chain records the final settlement receipt as an auditable on-chain artifact.
 
-## Compile Contracts
+The receipt links energy, value, carbon estimate, locality, status, and chain transaction data.
 
-```bash
-cd contracts
-npm install
-npx hardhat compile
-```
+## Why Japan
 
-## Deploy To HashKey Chain Testnet
+Japan has dense urban energy demand, mature rooftop solar adoption, and a growing post-FIT market need. YuiDen is designed around small local renewable settlement moments: household-level surplus, nearby buyers, transparent receipts, and agent-assisted coordination.
 
-Create `contracts/.env` from `contracts/.env.example` with local placeholder guidance, then add the required deployment values privately.
+## Why HashKey Chain
 
-Deploy:
+HashKey Chain gives YuiDen a public settlement record for each energy receipt. The MVP uses HashKey Chain for transparent receipt storage, low-cost smart contract execution, and mainnet proof that the settlement path can leave an auditable artifact.
 
-```bash
-cd contracts
-npm run deploy:hashkey
-```
+Mainnet proof is already recorded on HashKey Chain.
 
-The deploy script prints:
+## HSP Alignment
 
-```txt
-NEXT_PUBLIC_MOCK_USDT_ADDRESS=...
-NEXT_PUBLIC_YUIDEN_SETTLEMENT_ADDRESS=...
-NEXT_PUBLIC_HASHKEY_CHAIN_ID=133
-NEXT_PUBLIC_HASHKEY_RPC_URL=https://testnet.hsk.xyz
-NEXT_PUBLIC_HASHKEY_EXPLORER_URL=https://hashkeychain-testnet-explorer.alt.technology
-```
+YuiDen models energy settlement as an HSP-ready order and receipt lifecycle:
 
-Copy those values into the frontend `.env.local`, then restart `npm run dev`.
+- Draft an energy order from the agent decision.
+- Prepare payment-request and payment-confirmation states.
+- Record an HSP-aligned receipt payload.
+- Preserve order IDs, merchant references, producer, buyer, amount, kWh, zone, carbon estimate, chain ID, and status.
 
-## HashKey Chain Mainnet Deployment
+Current MVP status:
 
-YuiDen mainnet deployment is completed on HashKey Chain. This deployment is for hackathon proof and receipt demonstration, not production financial operation.
+- HashKey Chain receipt recording is implemented.
+- HSP-aligned order and receipt models are implemented.
+- Official HSP merchant/order integration is prepared but pending official credentials, endpoints, and merchant access.
 
-- Network: `HashKey Chain`
+YuiDen should be described as HSP-ready or HSP-aligned until official HSP merchant/order integration is live.
+
+## AI Track Fit
+
+YuiDen is an AI Track project because the product centers on a custom AI-agent pipeline for energy settlement:
+
+- Open-Meteo weather signal for Tokyo solar context.
+- Simulated smart-meter context for household production, demand, battery, and zone.
+- Locality-aware matching between surplus producers and nearby buyers.
+- Pricing and risk scoring for settlement readiness.
+- A custom YuiDen Agent output with forecast, confidence, locality score, weather score, balance score, and settlement readiness score.
+- Optional server-side OpenAI reasoning as an explanation layer.
+- Deterministic settlement execution for verifiability.
+
+OpenAI does not control the settlement transaction. The deterministic agent decision and contract execution remain the source of truth.
+
+## Mainnet Proof
+
+Network:
+
+- HashKey Chain mainnet
 - Chain ID: `177`
-- RPC URL: `https://mainnet.hsk.xyz`
-- Explorer: `https://hashkey.blockscout.com`
+- Explorer: https://hashkey.blockscout.com
 
-Mainnet contracts:
+Contracts:
 
 - MockUSDT demo token: `0x532951448Ad00659299b560001e0529659894fad`
 - MockUSDT explorer: https://hashkey.blockscout.com/address/0x532951448Ad00659299b560001e0529659894fad
 - YuiDenSettlement: `0x4031C90a4c856baE15EE660a8361B9Cf3Bf81541`
 - YuiDenSettlement explorer: https://hashkey.blockscout.com/address/0x4031C90a4c856baE15EE660a8361B9Cf3Bf81541
 
-Sample mainnet receipt proof:
+Sample mainnet receipt:
 
 - Transaction hash: `0x56f8fc3200d189813d93db9672f8064f696eef82481243ce3af0cb843c069533`
-- Explorer link: https://hsk.blockscout.com/tx/0x56f8fc3200d189813d93db9672f8064f696eef82481243ce3af0cb843c069533
-- Proof note: The sample transaction demonstrates YuiDenSettlement receipt recording on HashKey Chain mainnet.
+- Explorer: https://hsk.blockscout.com/tx/0x56f8fc3200d189813d93db9672f8064f696eef82481243ce3af0cb843c069533
 
-Real-vs-simulated scope:
+This transaction demonstrates YuiDenSettlement receipt recording on HashKey Chain mainnet.
 
-- `MockUSDT` is a demo token for settlement flow testing and hackathon proof.
-- The on-chain receipt path is real on HashKey Chain mainnet.
-- Smart-meter inputs are simulated for the MVP.
-- Official HSP merchant integration is HSP-ready and pending official credentials, endpoints, and merchant/order access. YuiDen should not be described as fully HSP-powered until that official integration is live.
+## Real vs Simulated
 
-Safety checklist:
+Real:
 
-- Use a dedicated burner deployer wallet.
-- Fund it with only a small HSK gas balance.
-- Never use a main wallet private key.
-- Never commit or print real private keys.
-- Keep official HSP merchant integration marked as HSP-ready until credentials and endpoints are available.
-- Remember that `MockUSDT` is a demo token, not a production payment asset.
+- HashKey Chain mainnet receipt transaction.
+- YuiDenSettlement smart contract.
+- MockUSDT demo token contract.
+- Open-Meteo Tokyo weather signal.
+- Custom YuiDen Agent scoring pipeline.
+- Optional server-side OpenAI reasoning layer.
+- Dashboard receipt persistence and local fallback mode.
+
+Simulated or demo:
+
+- Smart-meter data is simulated.
+- Household identities and meter readings are simulated.
+- Carbon estimate is modeled for the MVP.
+- MockUSDT is a demo token, not a production payment asset.
+- HSP merchant/order integration is prepared but not officially connected.
+
+Not claimed:
+
+- No physical energy delivery.
+- No real smart-meter hardware integration.
+- No production financial infrastructure.
+- No completed official HSP merchant/order integration.
+
+## Product Flow
+
+1. Open the YuiDen console.
+2. Run the YuiDen Agent.
+3. Review the route, forecast, scoring, and explanation.
+4. Execute HSP-aligned settlement.
+5. Record an on-chain HashKey Chain receipt or create a local fallback receipt.
+6. Inspect receipt status, transaction hash, and settlement metadata.
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- GSAP animations
+- Ethers
+- Privy/injected EVM wallet path
+- Hardhat
+- Solidity
+- Open-Meteo Forecast API
+- Optional server-side OpenAI reasoning
+- HashKey Chain
+
+## Local Development
+
+Install and run the frontend:
+
+```bash
+npm install
+npm run dev
+```
+
+Open:
+
+- Landing page: `http://localhost:3000`
+- Console: `http://localhost:3000/dashboard`
 
 Compile contracts:
 
 ```bash
 cd contracts
+npm install
 npx hardhat compile
 ```
 
-Deploy to HashKey Chain testnet:
+Use `.env.example` files for placeholder guidance only. Never commit real private keys, wallet secrets, API keys, or merchant credentials.
 
-```bash
-npx hardhat run scripts/deploy.ts --network hashkeyTestnet
-```
+## Related Docs
 
-Deploy to HashKey Chain mainnet:
-
-```bash
-npx hardhat run scripts/deploy.ts --network hashkeyMainnet
-```
-
-For this completed mainnet deployment, configure the frontend deployment environment with the public contract values:
-
-```env
-NEXT_PUBLIC_MOCK_USDT_ADDRESS=0x532951448Ad00659299b560001e0529659894fad
-NEXT_PUBLIC_YUIDEN_SETTLEMENT_ADDRESS=0x4031C90a4c856baE15EE660a8361B9Cf3Bf81541
-NEXT_PUBLIC_HASHKEY_CHAIN_ID=177
-NEXT_PUBLIC_HASHKEY_RPC_URL=https://mainnet.hsk.xyz
-NEXT_PUBLIC_HASHKEY_EXPLORER_URL=https://hashkey.blockscout.com
-```
-
-Save explorer proof links for both deployed contracts:
-
-```txt
-https://hashkey.blockscout.com/address/{contractAddress}
-```
-
-## Test Local Fallback
-
-Local fallback should work before any wallet or contract setup:
-
-1. Open `/dashboard`.
-2. Click `Run YuiDen Agent`.
-3. Click `Execute HSP-Aligned Settlement` without connecting a wallet, or click `Create Local Fallback Receipt`.
-4. Confirm a receipt appears with the `Local fallback` badge.
-
-Local fallback remains available when the wallet is disconnected, contract addresses are missing, the wallet is on the wrong network, MockUSDT balance is unavailable, or a wallet transaction is rejected.
-
-## Test On-Chain Settlement
-
-1. Add deployed values for `NEXT_PUBLIC_MOCK_USDT_ADDRESS` and `NEXT_PUBLIC_YUIDEN_SETTLEMENT_ADDRESS` to `.env.local`.
-2. Restart the frontend dev server.
-3. Open `/dashboard`.
-4. Connect MetaMask.
-5. Switch to HashKey Chain Testnet if prompted.
-6. Click `Run YuiDen Agent`.
-7. Click `Execute HSP-Aligned Settlement`.
-8. Confirm any required MockUSDT mint/faucet transaction if the token supports it.
-9. Confirm MockUSDT approval if allowance is below the settlement amount.
-10. Confirm the `settleEnergy(producer, kwhScaled, amount, zone, co2SavedGrams)` transaction.
-
-If the transaction succeeds, the receipt is added with an `On-chain` badge and a HashKey explorer transaction link:
-
-```txt
-https://hashkeychain-testnet-explorer.alt.technology/tx/{txHash}
-```
-
-If MockUSDT cannot be minted automatically, use a wallet that already has demo USDT or transfer/mint MockUSDT before retrying settlement.
-
-## MVP Scope
-
-- Next.js App Router, TypeScript, Tailwind CSS
-- GSAP landing animations
-- Local mock data
-- Frontend works before contract deployment with local fallback
-- Hardhat contracts in `contracts/contracts`
-- MockUSDT demo payment token
-- YuiDenSettlement on-chain energy receipt settlement contract
+- Mainnet evidence: `docs/DEPLOYMENT_EVIDENCE.md`
+- Mainnet checklist: `docs/MAINNET_DEPLOYMENT_CHECKLIST.md`
+- Audit report: `docs/YUIDEN_AUDIT_REPORT.md`
+- Hackathon submission brief: `docs/HACKATHON_SUBMISSION.md`
