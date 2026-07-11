@@ -55,7 +55,7 @@ export default function HeroVisual() {
 
         <div className="grid gap-3">
           <HeroRow label="Dynamic price" value="¥27.5/kWh" />
-          <HeroRow label="HSP-aligned order" value="2.01 mUSDT" />
+          <HeroRow label="HSP-aligned order" value="2.01 mockUSDT" />
           <HeroRow label="CO2 saved" value="5.02 kg" />
         </div>
 
