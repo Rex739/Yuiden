@@ -6,31 +6,35 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const stories = [
   {
-    tag: "Simulated meters",
-    title: "Read the local energy moment.",
-    copy: "Modeled solar output, battery reserve, household demand, and Tokyo weather become a clean settlement signal.",
-    meta: "24.7 kWh surplus",
+    tag: "Solar households",
+    title: "Prepare surplus for local settlement.",
+    copy: "See modeled generation, household demand, battery state, and available energy in one place.",
+    meta: "17.1 kWh available",
+    icon: "kWh",
     tone: "bg-[#9BE870]",
   },
   {
-    tag: "YuiDen Agent",
-    title: "Match homes like a settlement desk.",
-    copy: "The custom agent prioritizes same-zone routes, highest surplus, nearby demand, and settlement readiness.",
-    meta: "94% confidence",
+    tag: "Community operators",
+    title: "Coordinate local supply and demand.",
+    copy: "Inspect neighborhood balances, recommended routes, and settlement readiness across participating homes.",
+    meta: "Tokyo-East",
+    icon: "OP",
     tone: "bg-[#123D24] text-[#9BE870]",
   },
   {
-    tag: "HSP-ready flow",
-    title: "Prepare the order lifecycle.",
-    copy: "Dynamic kWh pricing is shaped into an HSP-aligned order and receipt path for future merchant integration.",
-    meta: "¥27.5/kWh",
+    tag: "YuiDen Agent",
+    title: "Make explainable matching decisions.",
+    copy: "Evaluate locality, weather, energy balance, confidence, and settlement readiness before preparing an order.",
+    meta: "94% confidence",
+    icon: "AI",
     tone: "bg-[#F6B73C] text-[#071A12]",
   },
   {
-    tag: "HashKey Chain",
-    title: "Leave a receipt every time.",
-    copy: "Each receipt records producer, buyer, kWh, value, zone, carbon estimate, and transaction status.",
-    meta: "Audit ready",
+    tag: "Receipt auditors",
+    title: "Verify every settlement record.",
+    copy: "Inspect energy quantity, value, zone, carbon estimate, transaction status, and HashKey Chain proof.",
+    meta: "Mainnet verifiable",
+    icon: "TX",
     tone: "bg-white text-[#071A12]",
   },
 ];
@@ -94,14 +98,14 @@ export default function ParallaxFlow() {
         <div className="grid gap-10 lg:grid-cols-[25rem_minmax(0,1fr)] lg:items-center xl:grid-cols-[31rem_minmax(0,1fr)]">
         <div className="max-w-[31rem] pr-5 md:pr-8">
           <p className="story-kicker mb-5 inline-flex rounded-full bg-[#E8FFF6] px-4 py-2 text-sm font-black text-[#20C997]">
-            Product story
+            Who it serves
           </p>
           <h2 className="story-title [font-family:var(--font-rowdies)] text-5xl font-black leading-[0.9] text-[#071A12] sm:text-6xl md:text-7xl">
-            For solar communities settling locally.
+            BUILT FOR LOCAL ENERGY COMMUNITIES.
           </h2>
           <p className="story-copy mt-6 max-w-lg text-lg font-bold leading-8 text-[#53645B]">
-            A carousel-style journey from simulated meter context to auditable HashKey Chain receipt, designed for
-            local renewable settlement.
+            One settlement workspace for solar households, community operators, intelligent agents, and receipt
+            auditors.
           </p>
           <div className="story-controls mt-8 flex gap-4">
             <button
@@ -133,7 +137,7 @@ export default function ParallaxFlow() {
               >
                 <div className="mb-14 flex items-center justify-between">
                   <div className="grid h-20 w-20 place-items-center rounded-full bg-white/85 text-2xl font-black md:h-24 md:w-24 md:text-3xl">
-                    {index === 0 ? "kWh" : index === 1 ? "AI" : index === 2 ? "HSP" : "TX"}
+                    {story.icon}
                   </div>
                   <span className="rounded-full bg-white/85 px-5 py-3 text-sm font-black text-[#071A12]">{story.meta}</span>
                 </div>
